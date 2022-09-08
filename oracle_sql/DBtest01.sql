@@ -1,0 +1,287 @@
+--DB계정생성
+--테이블생성
+--사원정보 : 사번,이름,성별,주소,전화번호,주민번호
+--출결: 관리번호(SEQUENCE),날짜,사번
+
+CREATE TABLE EMP (
+    EMP_ID   VARCHAR2(5) PRIMARY KEY,
+    EMP_NAME   VARCHAR2(20) NOT NULL,
+    GENDER  CHAR(1) CHECK(GENDER IN ('M','F')) ,
+    ADDRESS  VARCHAR2(50) NOT NULL  ,
+    PHONE   CHAR(13) UNIQUE NOT NULL ,
+    EMP_NO   CHAR(14) UNIQUE 
+);
+CREATE SEQUENCE EMP_SEQ;
+INSERT INTO EMP VALUES('E-'||EMP_SEQ.NEXTVAL, '사원1','M','서울','010-1111-1111','771122-1234567');
+SELECT * FROM EMP;
+
+CREATE TABLE ATTEND(
+    ATTEND_DATE DATE,
+    EMP_ID VARCHAR2(5) REFERENCES EMP--외래키 REFERENCES
+);
+INSERT INTO ATTEND VALUES(SYSDATE, 'E-1');
+SELECT * FROM ATTEND;
+
+---------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+--DB실습
+/*
+다음 업무 기술서는 고객 상담 관련 업무이다.
+1.  고객으로부터 전화를 받는다.
+2.  고객이 남성이면 A타입 상담일지에 기록하고, 여성이면 B타입 상담일지에 기록한다. 
+3.  한 건의 상담에 대해 고유한 일련번호를 부여한다.
+4.  상담 내용이 수리 요청이면 상담일지를 A/S 부서에 Fax로 전송한다.
+5.  상담 내용이 반품 요청이면 반품 목록에 고객 이름, 전화번호, 반품 내역을 기록한다.?
+위 요구사항을 처리할 수 있는 테이블을 생성하세요.
+*/
+--고객 : 고객 이름, 전화번호, 고객번호, 성별
+--상담일지 : 상담내용,일련번호,고객번호(고객 외래키사용),상담타입(A,B)
+--반품 :상담일련번호(상담일지외래키), 반품 내역
+
+
+
+
+CREATE TABLE CUSTOMER_SERVICE (
+    CUSTOM_ID  VARCHAR2(5) PRIMARY KEY,
+    CUSTOM_NAME VARCHAR2(20) NOT NULL,
+    CUSTOM_POHNE  CHAR(13) UNIQUE NOT NULL ,
+    CUSTOM_GENDER_TYPE  CHAR(1) CHECK(CUSTOM_GENDER_TYPE IN ('A','B'))--남자A,여자B
+    GOODS_NAME  VARCHAR2(20) NOT NULL,
+    CUSTOM_CONTENTS  VARCHAR2(6) CHECK(CUSTOM_CONTENTS IN ('수리','반품'))
+);
+CREATE SEQUENCE CUSTOMER_SERVICE_SEQ;
+INSERT INTO CUSTOMER_SERVICE VALUES('CS-'||CUSTOMER_SERVICE_SEQ.NEXTVAL,
+                          '홍길동','010-1111-1111','A','선풍기','수리');
+INSERT INTO CUSTOMER_SERVICE VALUES('CS-'||CUSTOMER_SERVICE_SEQ.NEXTVAL,
+                          '임나나','010-2222-2222','B','선풍기','반품');                          
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+--실습2
+/*
+다음은 IT 전문 학원에 대한 정보이다. 
+교육센터는 IT 전문 학원으로 다양한 과정을 개설하고 있다. 
+각 과정은 코드, 과정 명 및 수강료를 갖고 있다. 과정들은 1개월에서 6개월 등 기간은 다양하다. 
+각 강사에 대해 이름과 전화번호를 필요로 하며 한 강사는 여러 개의 과정을 수업할 수 있다. 
+학생들은 여러 개의 과정을 수강신청 할 수 있는데 많은 학생들이 이렇게 하고 있다. 
+학생 관리 차원에서 각 학생들의 이름과 전화번호를 기록한다. ?
+ERD 작성 후 테이블 생성구문 작성하세요.
+-----
+과정 : 과정코드,과정이름,수강료,기간
+강사 : 강사코드 ,이름,전화번호
+학생: 학생코드, 이름,전화번호
+
+*/
+CREATE TABLE TEACHER (
+    TEACHER_CODE  NUMBER PRIMARY KEY ,
+    TEACHER_NAME  VARCHAR2(20) NOT NULL,
+    TEACHER_PHONE  CHAR(13)  NOT NULL
+);
+CREATE SEQUENCE TEACHER_SEQ;
+CREATE TABLE STUDENT (
+    STUDENT_CODE  NUMBER PRIMARY KEY ,
+    STUDENT_NAME  VARCHAR2(20) NOT NULL,
+    STUDENT_PHONE  CHAR(13)  NOT NULL
+);  
+CREATE SEQUENCE STUDENT_SEQ;
+
+
+CREATE TABLE CLASS_TBL (
+    CLASS_CODE   NUMBER PRIMARY KEY ,
+    CLASS_NAME   VARCHAR2(100)  NOT NULL,
+    CLASS_PAY    NUMBER    NOT NULL,
+    CLASS_TURM   NUMBER   NOT NULL,
+    TEACHER_CODE   NUMBER REFERENCES TEACHER ON DELETE SET NULL
+);
+DROP TABLE CLASS_TBL;
+CREATE SEQUENCE CLASS_SEQ;
+
+CREATE TABLE ENROLMENT(
+   CLASS_CODE   NUMBER REFERENCES CLASS_TBL ON DELETE CASCADE,
+   STUDENT_CODE  NUMBER REFERENCES STUDENT ON DELETE CASCADE
+);
+INSERT INTO TEACHER
+VALUES(TEACHER_SEQ.NEXTVAL, '강사1', '010-1111-1111');
+INSERT INTO TEACHER
+VALUES(TEACHER_SEQ.NEXTVAL, '강사2', '010-2222-2222');
+INSERT INTO TEACHER
+VALUES(TEACHER_SEQ.NEXTVAL, '강사3', '010-3333-3333');
+INSERT INTO TEACHER
+VALUES(TEACHER_SEQ.NEXTVAL, '강사4', '010-4444-4444');
+INSERT INTO TEACHER
+VALUES(TEACHER_SEQ.NEXTVAL, '강사5', '010-5555-5555');
+SELECT * FROM TEACHER;
+
+INSERT INTO STUDENT
+VALUES(STUDENT_SEQ.NEXTVAL, '학생1', '010-9999-1111');
+INSERT INTO STUDENT
+VALUES(STUDENT_SEQ.NEXTVAL, '학생2', '010-9999-2222');
+INSERT INTO STUDENT
+VALUES(STUDENT_SEQ.NEXTVAL, '학생3', '010-9999-3333');
+INSERT INTO STUDENT
+VALUES(STUDENT_SEQ.NEXTVAL, '학생4', '010-9999-4444');
+INSERT INTO STUDENT
+VALUES(STUDENT_SEQ.NEXTVAL, '학생5', '010-9999-5555');
+SELECT * FROM STUDENT;
+
+DESC CLASS_TBL;
+SELECT * FROM TEACHER;
+INSERT INTO CLASS_TBL
+VALUES(CLASS_SEQ.NEXTVAL,'자바',10000000,50,3);
+INSERT INTO CLASS_TBL
+VALUES(CLASS_SEQ.NEXTVAL,'오라클',20000000,50,3);
+SELECT * FROM CLASS_TBL;
+DESC ENROLMENT;
+
+INSERT INTO ENROLMENT
+VALUES(3,4);
+INSERT INTO ENROLMENT
+VALUES(2,4);
+INSERT INTO ENROLMENT
+VALUES(3,3);
+SELECT * FROM ENROLMENT;
+
+--학생
+SELECT STUDENT_CODE FROM STUDENT WHERE STUDENT_NAME='학생3';
+SELECT * FROM ENROLMENT WHERE STUDENT_CODE=3;
+
+SELECT CLASS_NAME, CLASS_PAY, CLASS_TERM, TEACHER_NAME, TEACHER_PHONE
+FROM CLASS_TBL
+JOIN TEACHER USING(TEACHER_CODE)
+WHERE 
+CLASS_CODE IN
+    (SELECT * FROM ENROLMENT 
+    WHERE STUDENT_CODE=
+         (SELECT STUDENT_CODE FROM STUDENT 
+         WHERE STUDENT_NAME='학생3')
+     );--서브쿼리추가
+     
+--강사입장 
+SELECT TEACHER_CODE FROM TEACHER WHERE TEACHER_NAME='강사3';
+SELECT CLASS_CODE FROM CLASS_TBL WHERE TEACHER_CODE=3;
+
+SELECT STUDENT_CODE FROM ENROLMENT WHERE CLASS_CODE IN (1,2);
+SELECT * FROM STUDENT WHERE STUDENT_CODE = 4;
+
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+--실습3
+/*
+다음 업무 기술서는 도서 대출, 예약 관련 업무에 해당한다.
+1.  도서관에 있는 책마다 분류번호, 분류명, 저자명, 도서명, 출판사, 출판연도와 같은 속성들이 기록되어 있고, 도서관이 정한 고유의 도서번호가 부여된다. (같은 도서명이라도 도서번호가 다르다.)
+2.  보유 도서의 대출상태에 따라 대출상태 값이 0일 경우 대출 가능한 상태인 미대출 도서가 되고 대출 상태 값이 1이면 대출 중인 상태인 대출 도서이다. 
+3.  도서관리를 위한 직원은 도서를 구입하는 일을 담당한다. 여러 출판사나 대형 서점을 통해 구입하고, 직원 각자 담당하는 하나의 구입처가 할당 되어 있다. 
+4.  도서를 대출 받을 수 있는 대상은 학생, 교수, 직원이다. 한 사람이 대출할 수 있는 도서가능 수와 대출기간은 정해져 있으며 학생, 교수, 직원에 따라 대여기준이 다르다. 
+	(학생일 경우 대여기간이 7일, 대여가능 도서 수는 1권)
+	(교수일 경우 대여기간이 10일, 대여가능 도서 수는 2권)
+	(직원일 경우 대여 기간이 14일, 대여가능 도서 수는 3권)
+5.  미대출 도서일 경우 대출을 할 수 있고, 대출 도서일 경우 예약을 할 수 있는 상태가 된다. 예약된 도서가 반납되었을 경우 예약 순서대로 예약자에게 우선적으로 대출된다.?
+*/
+--책 : 도서번호, 분류번호, 분류명, 저자명, 도서명, 출판사, 출판연도,대출상태
+--회원 : 회원번호(PK), 회원이름,회원분류, 대여가능도서수, 대여기간,
+
+--직원 : 회원번호(외래키,프라이머리키/FK,PK)구입처,대여가능도서수(3권),대여기간(14일)
+
+--대출 : 대여번호(PK),대여일,회원번호,도서번호,반납상태
+--예약 : 예약번호(PK), 회원번호, 도서번호
+
+CREATE TABLE RESERVATION (
+	RESERVE_NO	NUMBER		NOT NULL,
+	BOOK-CODE	NUMBER		NOT NULL,
+	MEMBER_NO	NUMBER		NOT NULL
+);
+COMMENT ON COLUMN RESERVATION.BOOK-CODE IS '책 고유의 번호';
+
+COMMENT ON COLUMN RESERVATION.MEMBER_NO IS '대출하는 사람을 구분하기 위한 코드';
+
+CREATE TABLE BOOK (
+	BOOK-CODE	NUMBER		NOT NULL,
+	KIND_NO	NUMBER		NOT NULL,
+	KIND_NAME	VARCHAR2(50)		NOT NULL,
+	BOOK_WRITER	VARCHAR2(50)		NOT NULL,
+	BOOK_NAME	VARCHAR2(100)		NOT NULL,
+	BOOK_COMPANY	VARCHAR2(100)		NOT NULL,
+	BOOK_DATE	CHAR(10)		NOT NULL,
+	BOOK_STATUS	NUMBER		NOT NULL
+);
+
+COMMENT ON COLUMN BOOK.BOOK-CODE IS '책 고유의 번호';
+
+COMMENT ON COLUMN BOOK.KIND_NAME IS '도서별로 카테고리 구분';
+
+COMMENT ON COLUMN BOOK.BOOK_NAME IS '책이름';
+
+COMMENT ON COLUMN BOOK.BOOK_COMPANY IS '책 해당 출판사 이름';
+
+COMMENT ON COLUMN BOOK.BOOK_DATE IS '책 출판 연도';
+
+CREATE TABLE MEMBER (
+	MEMBER_NO	NUMBER		NOT NULL,
+	MEMBER_NAME	VARCHAR2(20)		NOT NULL,
+	MEMBER_TYPE	CHAR(6)		NOT NULL,
+	RENT_COUNT	NUMBER		NOT NULL,
+	RENT_DATE	NUMBER		NOT NULL
+);
+
+COMMENT ON COLUMN MEMBER.MEMBER_NO IS '대출하는 사람을 구분하기 위한 코드';
+
+COMMENT ON COLUMN MEMBER.MEMBER_NAME IS '대출하는 사람의 직업 및 신분';
+
+COMMENT ON COLUMN MEMBER.MEMBER_TYPE IS '직원/교수/학생';
+
+COMMENT ON COLUMN MEMBER.RENT_COUNT IS '학생->1권
+교수->2권
+직원->3권;
+
+COMMENT ON COLUMN MEMBER.RENT_DATE IS '학생의 경우-> 7일
+교수 -> 10일
+직원 ->14일;
+
+CREATE TABLE RENTAL (
+	RENTAL_NO	NUMBER		NOT NULL,
+	RENTAL_DATE	DATE		NOT NULL,
+	RETURN_STATUS	NUMBER	DEFAULT 0	NOT NULL,
+	BOOK-CODE	NUMBER		NOT NULL,
+	MEMBER_NO	NUMBER		NOT NULL
+);
+
+COMMENT ON COLUMN RENTAL.RETURN_STATUS IS '0:미반납
+1:반납완료';
+
+COMMENT ON COLUMN RENTAL.BOOK-CODE IS '책 고유의 번호';
+
+COMMENT ON COLUMN RENTAL.MEMBER_NO IS '대출하는 사람을 구분하기 위한 코드';
+
+CREATE TABLE EMPLOYEE (
+	MEMBER_NO	NUMBER		NOT NULL,
+	BUY_COMPANY	VARCHAR2(50)		NOT NULL
+);
+
+COMMENT ON COLUMN EMPLOYEE.MEMBER_NO IS '대출하는 사람을 구분하기 위한 코드';
+
+ALTER TABLE RESERVATION ADD CONSTRAINT PK_RESERVATION PRIMARY KEY (
+	RESERVE_NO
+);
+
+ALTER TABLE BOOK ADD CONSTRAINT PK_BOOK PRIMARY KEY (
+	BOOK-CODE
+);
+
+ALTER TABLE MEMBER ADD CONSTRAINT PK_MEMBER PRIMARY KEY (
+	MEMBER_NO
+);
+
+ALTER TABLE RENTAL ADD CONSTRAINT PK_RENTAL PRIMARY KEY (
+	RENTAL_NO
+);
+
+ALTER TABLE EMPLOYEE ADD CONSTRAINT PK_EMPLOYEE PRIMARY KEY (
+	MEMBER_NO
+);
+
+ALTER TABLE EMPLOYEE ADD CONSTRAINT FK_MEMBER_TO_EMPLOYEE_1 FOREIGN KEY (
+	MEMBER_NO
+)
+REFERENCES MEMBER (
+	MEMBER_NO
+);
+

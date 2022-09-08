@@ -1,0 +1,3 @@
+CREATE TABLE MEMO (
+    MEMO_NO
+)
